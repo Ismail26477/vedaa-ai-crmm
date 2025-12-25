@@ -3,11 +3,10 @@ import Caller from "../models/Caller.js"
 
 const router = express.Router()
 
-// <CHANGE> Ensure default admin exists
 const ensureDefaultAdmin = async () => {
   try {
     const adminExists = await Caller.findOne({ email: "admin@gmail.com" })
-    
+
     if (!adminExists) {
       await Caller.create({
         username: "admin",
@@ -25,17 +24,19 @@ const ensureDefaultAdmin = async () => {
   }
 }
 
-// Login
 router.post("/login", async (req, res) => {
   try {
-    // <CHANGE> Ensure admin exists before login attempt
+    // Ensure admin exists before login attempt
     await ensureDefaultAdmin()
-    
-    const { username, password } = req.body
+
+    const { username, password, email } = req.body
+
+    // Support both username and email parameters
+    const identifier = email || username
 
     // Try to find by username or email
     const caller = await Caller.findOne({
-      $or: [{ username }, { email: username }],
+      $or: [{ username: identifier }, { email: identifier }],
     })
 
     if (!caller) {
@@ -57,6 +58,7 @@ router.post("/login", async (req, res) => {
       status: caller.status,
     })
   } catch (error) {
+    console.error("Login error:", error)
     res.status(500).json({ message: "Server error", error: error.message })
   }
 })
