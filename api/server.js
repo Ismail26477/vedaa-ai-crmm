@@ -5,7 +5,6 @@ import mongoose from "mongoose"
 import authRoutes from "../server/routes/auth.js"
 import callerRoutes from "../server/routes/callers.js"
 import activityRoutes from "../server/routes/activities.js"
-import analyticsRoutes from "../server/routes/analytics.js"
 
 dotenv.config()
 
@@ -122,7 +121,6 @@ app.get("/api/setup", (req, res) => {
 app.use("/api/auth", authRoutes)
 app.use("/api/callers", callerRoutes)
 app.use("/api/activities", activityRoutes)
-app.use("/api/analytics", analyticsRoutes)
 
 // 404 handler
 app.use("/api/*", (req, res) => {
