@@ -113,11 +113,11 @@ export const fetchReportStats = async () => {
 }
 
 // Auth
-export const login = async (username: string, password: string) => {
+export const login = async (email: string, password: string) => {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ email, password }),
   })
   if (!response.ok) throw new Error("Invalid credentials")
   return response.json()
