@@ -5,6 +5,7 @@ import mongoose from "mongoose"
 import authRoutes from "../server/routes/auth.js"
 import callerRoutes from "../server/routes/callers.js"
 import activityRoutes from "../server/routes/activities.js"
+import Caller from "../server/models/Caller.js"
 
 dotenv.config()
 
@@ -58,11 +59,41 @@ const connectDB = async () => {
     cachedDb = await mongoose.connect(process.env.MONGODB_URI, opts)
     mongoConnecting = false
     console.log("[v0] MongoDB connected successfully")
+
+    await createDefaultAdmin()
+
     return cachedDb
   } catch (error) {
     mongoConnecting = false
     console.error("[v0] MongoDB connection failed:", error.message)
     throw error
+  }
+}
+
+const createDefaultAdmin = async () => {
+  try {
+    const adminExists = await Caller.findOne({ username: "admin" })
+
+    if (!adminExists) {
+      console.log("[v0] Creating default admin user...")
+      const admin = new Caller({
+        username: "admin",
+        name: "Administrator",
+        email: "admin@gmail.com",
+        password: "admin123", // Plain text stored as-is (NOT hashed in current schema)
+        role: "admin",
+        status: "active",
+        phone: "+1234567890",
+      })
+
+      await admin.save()
+      console.log("[v0] Default admin user created successfully")
+    } else {
+      console.log("[v0] Admin user already exists")
+    }
+  } catch (error) {
+    console.error("[v0] Error creating default admin:", error.message)
+    // Don't fail the entire app if admin creation fails
   }
 }
 
@@ -105,7 +136,7 @@ app.get("/api/setup", (req, res) => {
     mongoUri: hasMongoUri ? "✓ Configured" : "✗ Missing",
     databaseConnected: mongoose.connection.readyState === 1,
     instructions: hasMongoUri
-      ? "MongoDB URI is set. Login should work now."
+      ? "MongoDB URI is set. Login should work now. Try: admin@gmail.com / admin123"
       : [
           "1. Create MongoDB Atlas account: https://mongodb.com/cloud/atlas",
           "2. Create free database cluster",
