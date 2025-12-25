@@ -36,8 +36,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(mockUser)
       localStorage.setItem("vedavi_user", JSON.stringify(mockUser))
       return true
-    } catch (error) {
-      console.error("Login failed:", error)
+    } catch (error: any) {
+      console.error("[v0] Login error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      })
+
+      // Re-throw if it's a server error so Login.tsx can show a better message
+      if (error.response?.status === 500) {
+        throw error
+      }
       return false
     }
   }
@@ -59,3 +68,4 @@ export const useAuth = () => {
   }
   return context
 }
+
