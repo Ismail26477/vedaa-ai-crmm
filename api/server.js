@@ -16,18 +16,36 @@ app.use(cors())
 app.use(express.json())
 
 // MongoDB Connection
+let isConnected = false
+
 const connectDB = async () => {
+  if (isConnected) return
+
   try {
     if (!process.env.MONGODB_URI) {
-      console.error("MONGODB_URI is not defined in environment variables")
-      return
+      throw new Error("MONGODB_URI is missing")
     }
-    await mongoose.connect(process.env.MONGODB_URI)
-    console.log("MongoDB connected successfully")
+    const db = await mongoose.connect(process.env.MONGODB_URI)
+    isConnected = !!db.connections[0].readyState
+    console.log("[v0] MongoDB connected")
   } catch (error) {
-    console.error("MongoDB connection error:", error)
+    console.error("[v0] MongoDB connection error:", error)
+    throw error
   }
 }
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB()
+    next()
+  } catch (error) {
+    res.status(500).json({
+      message: "Database connection failed",
+      error: error.message,
+      tip: "Please check your MONGODB_URI in Vercel environment variables.",
+    })
+  }
+})
 
 connectDB()
 
