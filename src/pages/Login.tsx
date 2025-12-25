@@ -45,10 +45,14 @@ const Login = () => {
           variant: "destructive",
         })
       }
-    } catch (error) {
+    } catch (error: any) {
+      const isConnectionError = error.response?.status === 500
+
       toast({
-        title: "Error",
-        description: "Something went wrong",
+        title: isConnectionError ? "Server Error" : "Error",
+        description: isConnectionError
+          ? error.response?.data?.message || "Database connection failed. Please check MONGODB_URI."
+          : "Something went wrong. Please try again.",
         variant: "destructive",
       })
     } finally {
