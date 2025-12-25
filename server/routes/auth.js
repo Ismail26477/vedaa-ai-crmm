@@ -26,24 +26,22 @@ const ensureDefaultAdmin = async () => {
 
 router.post("/login", async (req, res) => {
   try {
-    // Ensure admin exists before login attempt
-    await ensureDefaultAdmin()
+    const { email, password } = req.body
 
-    const { username, password, email } = req.body
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" })
+    }
 
-    // Support both username and email parameters
-    const identifier = email || username
+    let caller = await Caller.findOne({ email: email })
 
-    // Try to find by username or email
-    const caller = await Caller.findOne({
-      $or: [{ username: identifier }, { email: identifier }],
-    })
+    if (!caller) {
+      caller = await Caller.findOne({ username: email })
+    }
 
     if (!caller) {
       return res.status(401).json({ message: "Invalid credentials" })
     }
 
-    // Simple password check (in production, use bcrypt)
     if (caller.password !== password) {
       return res.status(401).json({ message: "Invalid credentials" })
     }
@@ -58,8 +56,18 @@ router.post("/login", async (req, res) => {
       status: caller.status,
     })
   } catch (error) {
-    console.error("Login error:", error)
+    console.error("Login error:", error.message)
     res.status(500).json({ message: "Server error", error: error.message })
+  }
+})
+
+router.post("/setup-admin", async (req, res) => {
+  try {
+    await ensureDefaultAdmin()
+    res.json({ message: "Admin setup checked/completed" })
+  } catch (error) {
+    console.error("Setup error:", error)
+    res.status(500).json({ message: "Setup error", error: error.message })
   }
 })
 
