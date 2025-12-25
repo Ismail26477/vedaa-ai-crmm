@@ -10,7 +10,8 @@ dotenv.config()
 const MONGODB_URI = process.env.MONGODB_URI
 
 if (!MONGODB_URI) {
-  console.error("❌ MONGODB_URI is not defined in environment variables")
+  console.error("❌ MONGODB_URI environment variable is not set")
+  console.error("Please set MONGODB_URI before running the seed script")
   process.exit(1)
 }
 
