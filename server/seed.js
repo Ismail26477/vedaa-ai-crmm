@@ -7,8 +7,12 @@ import CallLog from "./models/CallLog.js"
 
 dotenv.config()
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb+srv://ismail:ismail123@cluster0.t63ghmf.mongodb.net/?appName=Cluster0"
+const MONGODB_URI = process.env.MONGODB_URI
+
+if (!MONGODB_URI) {
+  console.error("❌ MONGODB_URI is not defined in environment variables")
+  process.exit(1)
+}
 
 // Sample data
 const sampleCallers = [
