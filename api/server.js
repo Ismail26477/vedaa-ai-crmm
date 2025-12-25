@@ -16,38 +16,50 @@ app.use(cors())
 app.use(express.json())
 
 // MongoDB Connection
-let isConnected = false
+let cachedDb = null
 
 const connectDB = async () => {
-  if (isConnected) return
+  if (cachedDb && mongoose.connection.readyState === 1) {
+    console.log("[v0] Using cached MongoDB connection")
+    return cachedDb
+  }
 
   try {
     if (!process.env.MONGODB_URI) {
-      throw new Error("MONGODB_URI is missing")
+      console.error("[v0] CRITICAL: MONGODB_URI is missing from environment variables!")
+      throw new Error("MONGODB_URI is not configured. Please add it to your Vercel Project Settings.")
     }
-    const db = await mongoose.connect(process.env.MONGODB_URI)
-    isConnected = !!db.connections[0].readyState
-    console.log("[v0] MongoDB connected")
+
+    // Set connection options for better stability in serverless
+    const opts = {
+      bufferCommands: false,
+    }
+
+    console.log("[v0] Connecting to MongoDB...")
+    cachedDb = await mongoose.connect(process.env.MONGODB_URI, opts)
+    console.log("[v0] MongoDB connected successfully")
+    return cachedDb
   } catch (error) {
-    console.error("[v0] MongoDB connection error:", error)
+    console.error("[v0] MongoDB connection error:", error.message)
     throw error
   }
 }
 
 app.use(async (req, res, next) => {
+  console.log(`[v0] ${req.method} ${req.url}`)
+
   try {
     await connectDB()
     next()
   } catch (error) {
+    console.error("[v0] Request failed due to DB connection error:", error.message)
     res.status(500).json({
-      message: "Database connection failed",
+      message: "Database Connection Failed",
       error: error.message,
-      tip: "Please check your MONGODB_URI in Vercel environment variables.",
+      actionRequired: "Go to Vercel Dashboard > Settings > Environment Variables and add MONGODB_URI",
     })
   }
 })
-
-connectDB()
 
 // Routes
 app.use("/api/auth", authRoutes)
