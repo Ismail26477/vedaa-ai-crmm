@@ -47,7 +47,10 @@ export function AddLeadDialog({ open, onOpenChange, onAddLead }: AddLeadDialogPr
     const loadCallers = async () => {
       try {
         const data = await fetchCallers()
-        setCallers(data)
+        const activeUsers = data.filter(
+          (u: any) => (u.role === "caller" || u.role === "admin") && u.status !== "inactive",
+        )
+        setCallers(activeUsers)
       } catch (error) {
         console.error("Error loading callers:", error)
       }
