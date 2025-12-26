@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import type { Lead, LeadStage, LeadPriority, LeadSource, LeadStatus, LeadCategory, LeadSubcategory } from "@/types/crm"
 import { leadSourceLabels, leadCategoryLabels, leadSubcategoryLabels, categorySubcategoryMap } from "@/data/mockData"
 import { useToast } from "@/hooks/use-toast"
+import { fetchCallers } from "@/lib/api"
 
 interface AddLeadDialogProps {
   open: boolean
@@ -45,8 +46,7 @@ export function AddLeadDialog({ open, onOpenChange, onAddLead }: AddLeadDialogPr
   useEffect(() => {
     const loadCallers = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/callers")
-        const data = await response.json()
+        const data = await fetchCallers()
         setCallers(data)
       } catch (error) {
         console.error("Error loading callers:", error)
