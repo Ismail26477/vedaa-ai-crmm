@@ -1,15 +1,30 @@
 const getApiBaseUrl = () => {
-  // If we're in a browser environment
-  if (typeof window !== "undefined") {
-    // If the hostname is NOT localhost, we MUST use the relative /api path
-    // This is the most reliable way to avoid CORS issues in production (Vercel)
-    if (!window.location.hostname.includes("localhost")) {
-      return "/api"
-    }
+  const isBrowser = typeof window !== "undefined"
+  const hostname = isBrowser ? window.location.hostname : ""
+  const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1" || hostname.includes("localhost")
+
+  // [v0] Debug log to track environment detection
+  if (isBrowser) {
+    console.log(`[v0] Environment Check - Hostname: ${hostname}, isLocalhost: ${isLocalhost}`)
+  }
+
+  // If we are NOT on localhost, we MUST use relative paths to avoid CORS issues
+  // This overrides any environment variable that might be incorrectly set to localhost
+  if (isBrowser && !isLocalhost) {
+    console.log("[v0] Production detected: Forcing relative API path (/api)")
+    return "/api"
   }
 
   // Local development fallback
-  return import.meta.env.VITE_API_URL || "/api"
+  const envUrl = import.meta.env.VITE_API_URL
+
+  // Extra safety: if we're in production but the env var points to localhost, ignore it
+  if (isBrowser && !isLocalhost && envUrl?.includes("localhost")) {
+    console.log("[v0] Warning: VITE_API_URL points to localhost in production. Overriding with /api")
+    return "/api"
+  }
+
+  return envUrl || "/api"
 }
 
 const API_BASE_URL = getApiBaseUrl()
