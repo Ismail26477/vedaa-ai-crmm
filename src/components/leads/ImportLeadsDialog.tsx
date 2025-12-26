@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { leadCategoryLabels, leadSubcategoryLabels, categorySubcategoryMap } from "@/data/mockData"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { fetchCallers } from "@/lib/api"
 
 interface ImportLeadsDialogProps {
   open: boolean
@@ -109,9 +110,13 @@ export const ImportLeadsDialog = ({ open, onOpenChange, onImport }: ImportLeadsD
   useEffect(() => {
     const loadCallers = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/callers")
-        const data = await response.json()
-        setCallers(data.filter((c: any) => c.role === "caller"))
+        const data = await fetchCallers()
+        // and made it more resilient by including a fallback check
+        const activeUsers = data.filter(
+          (u: any) => (u.role === "caller" || u.role === "admin") && u.status !== "inactive",
+        )
+        console.log("[v0] Loaded active users for assignment:", activeUsers.length)
+        setCallers(activeUsers)
       } catch (error) {
         console.error("Error loading callers:", error)
       }
