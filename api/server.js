@@ -9,6 +9,7 @@ import leadsRoutes from "../server/routes/leads.js"
 import callLogsRoutes from "../server/routes/callLogs.js"
 import dashboardRoutes from "../server/routes/dashboard.js"
 import settingsRoutes from "../server/routes/settings.js"
+import reportsRoutes from "../server/routes/reports.js"
 import Caller from "../server/models/Caller.js"
 
 dotenv.config()
@@ -159,6 +160,7 @@ app.use("/api/activities", activityRoutes)
 app.use("/api/leads", leadsRoutes)
 app.use("/api/call-logs", callLogsRoutes)
 app.use("/api/dashboard", dashboardRoutes)
+app.use("/api/reports", reportsRoutes)
 app.use("/api/settings", settingsRoutes)
 
 // 404 handler
