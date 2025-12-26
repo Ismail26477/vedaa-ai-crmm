@@ -1,33 +1,30 @@
 const getApiBaseUrl = () => {
-  const isBrowser = typeof window !== "undefined"
-  const hostname = isBrowser ? window.location.hostname : ""
-  const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1" || hostname.includes("localhost")
+  // Always use relative paths in production
+  // This is the ONLY way to ensure CORS works correctly on Vercel
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname
+    console.log("[v0] Current hostname:", hostname)
 
-  // [v0] Debug log to track environment detection
-  if (isBrowser) {
-    console.log(`[v0] Environment Check - Hostname: ${hostname}, isLocalhost: ${isLocalhost}`)
+    // If we're NOT on localhost, ALWAYS use relative /api path
+    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+      console.log("[v0] Production detected, using relative /api path")
+      return "/api"
+    }
+
+    // Only on localhost, check for env variable
+    console.log("[v0] Localhost detected")
   }
 
-  // If we are NOT on localhost, we MUST use relative paths to avoid CORS issues
-  // This overrides any environment variable that might be incorrectly set to localhost
-  if (isBrowser && !isLocalhost) {
-    console.log("[v0] Production detected: Forcing relative API path (/api)")
-    return "/api"
-  }
-
-  // Local development fallback
+  // Local development fallback - check env variable or use relative path
   const envUrl = import.meta.env.VITE_API_URL
+  console.log("[v0] VITE_API_URL:", envUrl || "not set")
 
-  // Extra safety: if we're in production but the env var points to localhost, ignore it
-  if (isBrowser && !isLocalhost && envUrl?.includes("localhost")) {
-    console.log("[v0] Warning: VITE_API_URL points to localhost in production. Overriding with /api")
-    return "/api"
-  }
-
+  // NEVER return a hardcoded localhost URL - always use what's configured or relative
   return envUrl || "/api"
 }
 
 const API_BASE_URL = getApiBaseUrl()
+console.log("[v0] Final API_BASE_URL:", API_BASE_URL)
 
 // Leads
 export const fetchLeads = async () => {
