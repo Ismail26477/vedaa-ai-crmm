@@ -1,4 +1,17 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "/api"
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL
+
+  // If we're in production (Vercel) or the environment variable is pointing to localhost
+  // but we're not on localhost ourselves, we should use the relative /api path.
+  // This prevents CORS issues when localhost is accidentally hardcoded in production env vars.
+  if (import.meta.env.PROD || (envUrl?.includes("localhost:5000") && !window.location.hostname.includes("localhost"))) {
+    return "/api"
+  }
+
+  return envUrl || "/api"
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 // Leads
 export const fetchLeads = async () => {
