@@ -75,7 +75,7 @@ const Login = () => {
             <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-gradient-to-br from-secondary to-orange-500 flex items-center justify-center shadow-amber">
               <span className="text-xl lg:text-2xl font-bold text-white font-display">V</span>
             </div>
-            <span className="text-2xl lg:text-3xl font-bold text-white font-display">Veda VI</span>
+            <span className="text-2xl lg:text-3xl font-bold text-white font-display">Vedaa AI</span>
           </div>
           <p className="text-sm lg:text-base text-white/70">Real Estate CRM Platform</p>
         </div>
@@ -186,7 +186,7 @@ const Login = () => {
         </Card>
 
         <p className="text-center text-white/50 text-xs lg:text-sm mt-4 lg:mt-6">
-          © 2025 Veda VI. All rights reserved.
+          © 2025 Vedaa AI. All rights reserved.
         </p>
       </div>
     </div>
